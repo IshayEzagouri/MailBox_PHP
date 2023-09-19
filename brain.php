@@ -12,11 +12,14 @@ class brain {
         $name = isset($params['name']) ? $params['name'] : "";
         $mailbox_number = isset($params['mailbox_number']) ? $params['mailbox_number'] : "";
         $phone_number = isset($params['phone_number']) ? $params['phone_number'] : "";
-
-        $q = "INSERT INTO `users` (name, mailbox_number, phone_number) VALUES ('$name', '$mailbox_number', '$phone_number')";
-        $result = mysqli_query($this->mysql, $q);
+    
+        $nextID = $this->getNumOfUsers($this->mysql) + 1;
+        $insert = "INSERT INTO `users` (id, name, mailbox_number, phone_number) VALUES ('$nextID', '$name', '$mailbox_number', '$phone_number')";
+        $result= mysqli_query($this->mysql, $insert);
+    
         return $result;
     }
+    
 
     public function UpdateUser($params) {
         $id = isset($params['id']) ? $params['id'] : -1;
@@ -42,13 +45,39 @@ class brain {
     }
 
     public function DeleteUser($id) {
-        $q = "DELETE FROM `users` WHERE id=$id";
-        $result = mysqli_query($this->mysql, $q);
-
-        if ($result) {
+        $delete = "DELETE FROM `users` WHERE id = $id";
+        $resultDelete = mysqli_query($this->mysql, $delete);
+    
+        if (!$resultDelete) {
+            return false; 
+        }
+    
+        $update = "UPDATE `users` SET id = id - 1 WHERE id > $id";
+        $resultUpdate = mysqli_query($this->mysql, $update);
+    
+        if ($resultUpdate) {
             return true; 
         } else {
             return false; 
         }
+    }
+    
+    function containsOnlyLetters($str) {
+        for ($i = 0; $i < strlen($str); $i++) {
+            $char = $str[$i];
+            
+            if (!($char >= 'a' && $char <= 'z') && !($char >= 'A' && $char <= 'Z')) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    public function getNumOfUsers($mysql) {
+        $sql = "SELECT COUNT(*) AS count FROM users";
+        $result = mysqli_query($mysql, $sql);
+        $row = mysqli_fetch_assoc($result);
+        return intval($row['count']);
     }
 }

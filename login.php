@@ -1,19 +1,16 @@
 <?php
 session_start();
 include "mysql_conn.php";
-include "class_users.php";
+include "brain.php";
+
 $mysql_obj = new mysql_conn();
 $mysql = $mysql_obj->GetConn();
-$users_obj = new users($mysql);
+$users_obj = new brain($mysql);
 
 $rightPass = "AAA";
 
-$maxLoginAttempts = 5; //brute force
-$lockoutDuration = 1800; 
-if (isset($_SESSION['lockout_time']) && time() - $_SESSION['lockout_time'] < $lockoutDuration) {
-    echo "Your account is locked. Please try again later.";
-    exit;
-}
+$maxLoginAttempts = 5; // Brute force
+$lockoutDuration = 1800;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['password'])) {
@@ -22,8 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($password === $rightPass) {
             $_SESSION['login_attempts'] = 0;
             
+            // Generate CSRF token
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
             header("location: homePage.php");
-            exit;
+           
         } else {
             if (!isset($_SESSION['login_attempts'])) {
                 $_SESSION['login_attempts'] = 1;
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($_SESSION['login_attempts'] >= $maxLoginAttempts) {
                 $_SESSION['lockout_time'] = time();
                 echo "Your account is locked. Please try again later.";
-                exit;
+               
             } else {
                 echo "Incorrect password. Please try again.";
             }
@@ -50,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 </body>
 </html>
-
 
 <!DOCTYPE html>
 <html lang="en">

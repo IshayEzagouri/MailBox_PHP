@@ -1,9 +1,10 @@
+
+
+
 <?php
 
 session_start();
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); 
-}
+
 
 include "mysql_conn.php";
 include "brain.php"; 
@@ -12,6 +13,7 @@ $mysql_obj = new mysql_conn();
 $mysql = $mysql_obj->GetConn();
 $brain_obj = new Brain($mysql);
 
+// validate csrf token before given access to delete
 if (isset($_POST['delete']) && isset($_POST['id'])) {
     if (isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']) {
         $user_id = $_POST['id'];
@@ -129,6 +131,7 @@ $result = mysqli_query($mysql, $sql);
         <tbody>
             <?php while ($row = mysqli_fetch_assoc($result)) : ?>
                 <tr>
+                    
                     <td><?php echo htmlspecialchars($row['id']); ?></td> <!-- xss -->
                     <td><?php echo htmlspecialchars($row['name']); ?></td> <!-- xss -->
                     <td><?php echo htmlspecialchars($row['mailbox_number']); ?></td><!-- xss -->
@@ -147,7 +150,9 @@ $result = mysqli_query($mysql, $sql);
     </table>
 
     <div class="center-form">
-        <button>Add</button>
+          <a href="addUser.php">
+            <button>Add</button>
+        </a>
     </div>
 </body>
 </html>

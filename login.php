@@ -8,7 +8,7 @@ $users_obj = new users($mysql);
 
 $rightPass = "AAA";
 
-$maxLoginAttempts = 5;
+$maxLoginAttempts = 5; //brute force
 $lockoutDuration = 1800; 
 if (isset($_SESSION['lockout_time']) && time() - $_SESSION['lockout_time'] < $lockoutDuration) {
     echo "Your account is locked. Please try again later.";

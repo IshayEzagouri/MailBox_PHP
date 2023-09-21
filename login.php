@@ -3,14 +3,10 @@ session_start();
 include "mysql_conn.php";
 include "brain.php";
 
-$mysql_obj = new mysql_conn();
-$mysql = $mysql_obj->GetConn();
-$users_obj = new brain($mysql);
 
 $rightPass = "AAA";
-
 $maxLoginAttempts = 5; // Brute force
-$lockoutDuration = 1800;
+$lockoutDuration = 1800; // Brute force
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['password'])) {
@@ -24,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             header("location: homePage.php");
            
+            // Brute force
         } else {
             if (!isset($_SESSION['login_attempts'])) {
                 $_SESSION['login_attempts'] = 1;

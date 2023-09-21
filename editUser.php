@@ -7,7 +7,7 @@ include "brain.php";
 $mysql_obj = new mysql_conn();
 $mysql = $mysql_obj->GetConn();
 $brain_obj = new Brain($mysql);
-$numOfUsers=$brain_obj->getNumOfUsers($mysql);
+
 $user_id = "";
 $user_name = "";
 $user_mailbox_number = "";
@@ -15,7 +15,6 @@ $user_phone_number = "";
 
 if (isset($_GET['id'])) {
     $user_id = $_GET['id'];
-
     $sql = "SELECT name, mailbox_number, phone_number FROM users WHERE id = $user_id";
     $result = mysqli_query($mysql, $sql);
 
@@ -33,10 +32,10 @@ if (isset($_GET['id'])) {
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Validate CSRF token
     if (isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']) {
-        //xss
-        $new_name = htmlspecialchars($_POST["name"]);
-        $new_mailbox_number = htmlspecialchars($_POST["mailbox_number"]);
-        $new_phone_number = htmlspecialchars($_POST["phone_number"]);
+        // xss
+        $new_name = htmlspecialchars($_POST['name']);
+        $new_mailbox_number = htmlspecialchars($_POST['mailbox_number']);
+        $new_phone_number = htmlspecialchars($_POST['phone_number']);
 
         // Input validation
         if (empty($new_name) || !$brain_obj->containsOnlyLetters($new_name)) {
@@ -52,11 +51,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 'phone_number' => addslashes($new_phone_number),
             ];
 
-            $updated = $brain_obj->CreateUser($update_params);
+            $updated = $brain_obj->UpdateUser($update_params);
 
             if ($updated) {
-                header("Location: addUser.php");
-
+                header("Location: homePage.php");
             } else {
                 echo '<script>alert("Error updating user.");</script>';
             }
@@ -65,8 +63,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo '<script>alert("CSRF token validation failed.");</script>';
     }
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -74,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add User</title>
+    <title>Edit User</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -92,51 +88,54 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             color: #007BFF;
         }
 
-        .center-form {
+        form {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            margin: 10px 0;
+            margin-top: 20px;
         }
 
-        .center-form input[type="text"] {
+        input[type="text"] {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 3px;
             font-size: 16px;
-            margin-right: 10px;
-            width: 200px;
+            margin: 5px;
+            width: 300px;
         }
 
-        .center-form button {
+        button[type="submit"] {
             background-color: #007BFF;
             color: #fff;
             border: none;
             border-radius: 3px;
             padding: 10px 20px;
             cursor: pointer;
+            margin-top: 10px;
         }
 
-        .go-back-button {
-            margin-top: 20px; 
+        a.button {
+            text-decoration: none;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 3px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <h2>Add User</h2>
-
-    <form method="post">
-        <div class="center-form">
-            <input type="text" placeholder="<?php echo $numOfUsers + 1; ?>" readonly>
-            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-            <input type="text" name="name" placeholder="Name">
-            <input type="text" name="mailbox_number" placeholder="Mailbox Number">
-            <input type="text" name="phone_number" placeholder="Phone Number">
-            <button type="submit">Add</button>
-        </div>
+    <h2>Edit User</h2>
+    
+    <form method="post" action="editUser.php?id=<?php echo $user_id; ?>">
+        <input type="text" name="name" placeholder="Name" value="<?php echo htmlspecialchars($user_name, ENT_QUOTES, 'UTF-8'); ?>"> <!-- xss !-->
+        <input type="text" name="mailbox_number" placeholder="Mailbox Number" value="<?php echo htmlspecialchars($user_mailbox_number, ENT_QUOTES, 'UTF-8'); ?>"> <!-- xss !-->
+        <input type="text" name="phone_number" placeholder="Phone Number" value="<?php echo htmlspecialchars($user_phone_number, ENT_QUOTES, 'UTF-8'); ?>"> <!-- xss !-->
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>"> <!-- CSRF token !-->
+        <button type="submit">Save Changes</button>
     </form>
 
-    <a href="homePage.php" class="home-button">
-        <button>Main Page</button>
-    </a>
+    <a href="homePage.php" class="button">Back to Homepage</a>
 </body>
 </html>

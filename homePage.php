@@ -2,6 +2,8 @@
 
 
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 session_start();
 
@@ -11,7 +13,7 @@ include "brain.php";
 
 $mysql_obj = new mysql_conn();
 $mysql = $mysql_obj->GetConn();
-$brain_obj = new Brain($mysql);
+$brain_obj = new brain($mysql);
 
 // validate csrf token before given access to delete
 if (isset($_POST['delete']) && isset($_POST['id'])) {
@@ -136,11 +138,11 @@ $result = mysqli_query($mysql, $sql);
                     <td><?php echo htmlspecialchars($row['name']); ?></td> <!-- xss -->
                     <td><?php echo htmlspecialchars($row['mailbox_number']); ?></td><!-- xss -->
                     <td><?php echo htmlspecialchars($row['phone_number']); ?></td><!-- xss -->
-                    <td><button>Edit</button></td>
+                    <td><a href="editUser.php?id=<?php echo $row['id']; ?>"><button>Edit</button></a></td>
                     <td>
                         <form method="post" action="homePage.php">
                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>"><!-- csrf token -->
                             <button type="submit" name="delete">Delete</button>
                         </form>
                     </td>

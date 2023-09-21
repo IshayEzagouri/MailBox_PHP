@@ -3,7 +3,6 @@
 
 class brain {
     private $mysql;
-
     function __construct($conn) {
         $this->mysql = $conn;
     }
@@ -38,11 +37,7 @@ class brain {
         }
     }
 
-    public function GetUser($id) {
-        $q = "SELECT * FROM `users` WHERE id=$id";
-        $result = mysqli_query($this->mysql, $q);
-        return mysqli_fetch_assoc($result);
-    }
+  
 
     public function DeleteUser($id) {
         $delete = "DELETE FROM `users` WHERE id = $id";
@@ -74,10 +69,28 @@ class brain {
         return true;
     }
 
+    function containsOnlyNumbers($str) {
+        for ($i = 0; $i < strlen($str); $i++) {
+            $char = $str[$i];
+    
+            if (!($char >= '0' && $char <= '9')) {
+                error_log("containsOnlyNumbers: Invalid character '$char'");
+                return false;
+            }
+        }
+    
+        return true;
+    }
+    
+    
+
     public function getNumOfUsers($mysql) {
         $sql = "SELECT COUNT(*) AS count FROM users";
         $result = mysqli_query($mysql, $sql);
         $row = mysqli_fetch_assoc($result);
         return intval($row['count']);
     }
+
+    
+    
 }
